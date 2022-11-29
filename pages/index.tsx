@@ -1,44 +1,76 @@
 import type {NextPage} from 'next'
+import { ChangeEventHandler, FC, useState } from 'react'
 
-//型アノテーション
-let foo: number = 123
-
-//型アサーション
-let type = {} as { bar: number }
-
-// boolean
-const boolean: boolean = true || false
-
-//string
-const string: string = 'string'
-
-//number
-const integer: number = 123
-
-//null
-const bar: null = null
-
-//undefined
-const fff: undefined = undefined
-
-// boolean literal types
-const boolean2: true = true
-
-//string literal types
-const string2: 'string2' = 'string2';
-
-//number literal types
-const number2: 123 = 123
-
-// Widening , ex) string literal types → string types
-const foo2 = 'foo2'  //as const, const アサーション や :'foo2' 型アノテーションで対応
-let foo3 = foo2
-
+type Todo = {
+  id: number;
+  label: string;
+  isDone: boolean;
+};
 
 const Home: NextPage = ()=>{
+  const [text, setText] = useState('')
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  const toggle: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setTodos((prevTodos) => {
+      return prevTodos.map((todo) => {
+        if (todo.id === Number(event.target.value)) {
+          return { ...todo, isDone: !todo.isDone };
+        }
+        return todo;
+      });
+    });
+  };
+
+  const input: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setText(event.target.value);
+  };
+
+  const add = () =>{
+    setTodos((prevTodos)=>{
+      return [
+        ...prevTodos,
+        { id: Math.random(), label: text,isDone: false },
+      ]
+    })
+    setText('')
+  }
+
   return (
-    <div>test</div>
-  )
+    <div>
+      <h1>Todo</h1>
+      <div>
+        <input type="text" value={text} onChange={input} />
+        <button onClick={add}>Add</button>
+      </div>
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <ListItem todo={todo} toggle={toggle} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
+
+type listItemProps = {
+  todo: Todo;
+  toggle: ChangeEventHandler<HTMLInputElement>;
+};
+
+const ListItem: FC<listItemProps> = ({ todo, toggle }) => {
+  return (
+    <label>
+      <input
+        type="checkbox"
+        value={todo.id}
+        checked={todo.isDone}
+        onChange={toggle}
+      />
+      <span>{todo.label}</span>
+    </label>
+  );
+};
 
 export default Home
